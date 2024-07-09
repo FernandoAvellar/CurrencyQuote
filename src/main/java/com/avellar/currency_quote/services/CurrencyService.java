@@ -26,10 +26,10 @@ public class CurrencyService {
 
 	private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 	private final RestTemplate restTemplate = new RestTemplate();
-	private final String VALID_COINS = "USD-BRL,EUR-BRL";
+	private final String VALID_COINS = "USD-BRL,JPY-BRL,BTC-BRL,CAD-BRL,GBP-BRL,ARS-BRL,CHF-BRL,AUD-BRL,CNY-BRL,ETH-BRL,SGD-BRL,AED-BRL,DKK-BRL,SEK-BRL,CLP-BRL,PYG-BRL,MXN-BRL,UYU-BRL,COP-BRL,BOB-BRL";
 	private final String apiUrl = "https://economia.awesomeapi.com.br/json/last/" + VALID_COINS;
 
-	@Scheduled(fixedRate = 30000)
+	@Scheduled(cron = "*/30 * 8-18 * * MON-FRI") // (roda a cada 30 segundos das 8:30h às 18:59h somente em dias de semana)
 	public void fetchAndStoreCurrencyRates() {
 		@SuppressWarnings("unchecked")
 		Map<String, Map<String, String>> response = restTemplate.getForObject(apiUrl, Map.class);

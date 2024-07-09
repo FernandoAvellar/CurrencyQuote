@@ -31,13 +31,18 @@ public class CurrencyRate implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-
+	
+	@Column(precision = 12, scale = 5)
 	private BigDecimal high;
+	@Column(precision = 12, scale = 5)
 	private BigDecimal low;
+	@Column(precision = 12, scale = 5)
 	private BigDecimal varBid;
+	@Column(precision = 12, scale = 5)
 	private BigDecimal pctChange;
-	@Column(nullable = false)
+	@Column(nullable = false, precision = 12, scale = 5)
 	private BigDecimal bid;
+	@Column(precision = 12, scale = 5)
 	private BigDecimal ask;
 	@Column(nullable = false)
 	private Long timestamp;
