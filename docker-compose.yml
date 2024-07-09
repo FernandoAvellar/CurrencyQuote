@@ -6,3 +6,13 @@ services:
     container_name: my-redis-stack
     ports:
       - "6379:6379"
+ 
+  postgres:
+    image: postgres:latest
+    container_name: my-postgres-db
+    environment:
+      POSTGRES_DB: currencydb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres  
+    ports:
+      - "5432:5432"
