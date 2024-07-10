@@ -13,6 +13,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.avellar.currency_quote.entities.Currency;
 import com.avellar.currency_quote.entities.CurrencyRate;
+import com.avellar.currency_quote.exception.CurrencyNotFoundException;
 import com.avellar.currency_quote.repositories.CurrencyRateRepository;
 import com.avellar.currency_quote.repositories.CurrencyRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -74,6 +75,9 @@ public class CurrencyService {
 	
 	public CurrencyRate getLastCurrencyRate(String code) {
         Object currencyRateObj = redisTemplate.opsForValue().get(code);
+        if (currencyRateObj == null) {
+            throw new CurrencyNotFoundException("Currency code [" + code + "] not found.");
+        }
         return objectMapper.convertValue(currencyRateObj, CurrencyRate.class);
     }
 
