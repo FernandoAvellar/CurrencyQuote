@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.avellar.currency_quote.entities.Currency;
@@ -91,6 +92,10 @@ public class CurrencyService {
 		// Converter USDBRL para USD-BRL
 		String formattedCurrency = currency.substring(0, 3) + "-" + currency.substring(3);
 		String url = "https://economia.awesomeapi.com.br/json/daily/" + formattedCurrency + "/" + numberOfDays;
-		return restTemplate.getForObject(url, Object.class);
+		try {
+			return restTemplate.getForObject(url, Object.class);
+		} catch (HttpClientErrorException e) {
+			throw new CurrencyNotFoundException("Currency code [" + currency + "] not found.");
+		}
 	}
 }
