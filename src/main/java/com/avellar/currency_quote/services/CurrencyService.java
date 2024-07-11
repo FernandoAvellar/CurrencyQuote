@@ -27,19 +27,20 @@ public class CurrencyService {
 
 	@Autowired
 	private CurrencyRateRepository currencyRateRepository;
-	
+
 	@Autowired
-    private RedisTemplate<String, Object> redisTemplate;
-	
+	private RedisTemplate<String, Object> redisTemplate;
+
 	@Autowired
-    private ObjectMapper objectMapper;
+	private ObjectMapper objectMapper;
 
 	private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 	private final RestTemplate restTemplate = new RestTemplate();
 	private final String VALID_COINS = "USD-BRL,EUR-BRL,JPY-BRL,BTC-BRL,CAD-BRL,GBP-BRL,ARS-BRL,CHF-BRL,AUD-BRL,CNY-BRL,ETH-BRL,SGD-BRL,AED-BRL,SEK-BRL,CLP-BRL,PYG-BRL,MXN-BRL,UYU-BRL,COP-BRL,BOB-BRL";
 	private final String apiUrl = "https://economia.awesomeapi.com.br/json/last/" + VALID_COINS;
 
-	@Scheduled(cron = "*/30 * 8-18 * * MON-FRI") // (roda a cada 30 segundos das 8:30h às 18:59h somente em dias de semana)
+	@Scheduled(cron = "*/30 * 8-18 * * MON-FRI") // (roda a cada 30 segundos das 8:30h às 18:59h somente em dias de
+													// semana)
 	public void fetchAndStoreCurrencyRates() {
 		@SuppressWarnings("unchecked")
 		Map<String, Map<String, String>> response = restTemplate.getForObject(apiUrl, Map.class);
@@ -68,22 +69,28 @@ public class CurrencyService {
 			currencyRate.setCreateDate(LocalDateTime.parse(data.get("create_date"), dateTimeFormatter));
 
 			currencyRateRepository.save(currencyRate);
-			
+
 			// Store the last quotation in cache using Redis Server
-            redisTemplate.opsForValue().set(code, currencyRate);
+			redisTemplate.opsForValue().set(code, currencyRate);
 		}
 	}
-	
+
 	public CurrencyRate getLastCurrencyRate(String code) {
-        Object currencyRateObj = redisTemplate.opsForValue().get(code);
-        if (currencyRateObj == null) {
-            throw new CurrencyNotFoundException("Currency code [" + code + "] not found.");
-        }
-        return objectMapper.convertValue(currencyRateObj, CurrencyRate.class);
-    }
-	
+		Object currencyRateObj = redisTemplate.opsForValue().get(code);
+		if (currencyRateObj == null) {
+			throw new CurrencyNotFoundException("Currency code [" + code + "] not found.");
+		}
+		return objectMapper.convertValue(currencyRateObj, CurrencyRate.class);
+	}
+
 	public List<Currency> findAllCurrency() {
 		return currencyRepository.findAll();
 	}
 
+	public Object getHistoricalRates(String currency, int numberOfDays) {
+		// Converter USDBRL para USD-BRL
+		String formattedCurrency = currency.substring(0, 3) + "-" + currency.substring(3);
+		String url = "https://economia.awesomeapi.com.br/json/daily/" + formattedCurrency + "/" + numberOfDays;
+		return restTemplate.getForObject(url, Object.class);
+	}
 }

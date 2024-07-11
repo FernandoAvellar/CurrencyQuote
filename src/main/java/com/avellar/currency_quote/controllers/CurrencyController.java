@@ -23,10 +23,14 @@ public class CurrencyController {
 	public CurrencyRate getLastCurrencyRate(@PathVariable String code) {
 		return currencyService.getLastCurrencyRate(code);
 	}
-	
+
 	@GetMapping
 	public List<Currency> findAllCurrency() {
 		return currencyService.findAllCurrency();
 	}
 
+	@GetMapping("/historical/{code}/{numberOfDays}")
+	public Object getHistoricalRates(@PathVariable String code, @PathVariable int numberOfDays) {
+		return currencyService.getHistoricalRates(code, numberOfDays);
+	}
 }

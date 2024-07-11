@@ -8,6 +8,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,6 +19,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.avellar.currency_quote.entities.Currency;
 import com.avellar.currency_quote.entities.CurrencyRate;
 import com.avellar.currency_quote.exception.CurrencyNotFoundException;
 import com.avellar.currency_quote.services.CurrencyService;
@@ -61,4 +64,26 @@ public class CurrencyControllerTest {
 		mockMvc.perform(get("/currency/rate/UNKNOWN")).andExpect(status().isNotFound())
 				.andExpect(content().string("Currency code not found"));
 	}
+	
+	@Test
+    public void testFindAllCurrency() throws Exception {
+        Currency currency1 = new Currency();
+        currency1.setCode("USD-BRL");
+        currency1.setName("Dólar Americano/Real Brasileiro");
+
+        Currency currency2 = new Currency();
+        currency2.setCode("EUR-BRL");
+        currency2.setName("Euro/Real Brasileiro");
+
+        List<Currency> currencies = Arrays.asList(currency1, currency2);
+
+        Mockito.when(currencyService.findAllCurrency()).thenReturn(currencies);
+
+        mockMvc.perform(get("/currency"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].code").value("USD-BRL"))
+                .andExpect(jsonPath("$[0].name").value("Dólar Americano/Real Brasileiro"))
+                .andExpect(jsonPath("$[1].code").value("EUR-BRL"))
+                .andExpect(jsonPath("$[1].name").value("Euro/Real Brasileiro"));
+    }
 }
