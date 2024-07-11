@@ -3,6 +3,7 @@ package com.avellar.currency_quote.services;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,5 +81,9 @@ public class CurrencyService {
         }
         return objectMapper.convertValue(currencyRateObj, CurrencyRate.class);
     }
+	
+	public List<Currency> findAllCurrency() {
+		return currencyRepository.findAll();
+	}
 
 }
