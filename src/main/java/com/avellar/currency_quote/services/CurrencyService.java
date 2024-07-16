@@ -21,6 +21,8 @@ import com.avellar.currency_quote.repositories.CurrencyRateRepository;
 import com.avellar.currency_quote.repositories.CurrencyRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class CurrencyService {
 
@@ -43,6 +45,7 @@ public class CurrencyService {
 
 	// (roda a cada 30 segundos das 8:30h às 18:59h somente em dias de semana)
 	@Scheduled(cron = "*/30 * 8-18 * * MON-FRI")
+	@Transactional
 	public void fetchAndStoreCurrencyRates() {
 		@SuppressWarnings("unchecked")
 		Map<String, Map<String, String>> response = restTemplate.getForObject(apiUrl, Map.class);
