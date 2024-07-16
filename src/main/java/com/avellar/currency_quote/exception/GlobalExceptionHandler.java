@@ -12,4 +12,9 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<String> handleCurrencyNotFoundException(CurrencyNotFoundException ex) {
 		return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
 	}
+
+	@ExceptionHandler(ExternalApiFailureException.class)
+	public ResponseEntity<String> handleExternalApiFailureException(ExternalApiFailureException ex) {
+		return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_GATEWAY);
+	}
 }

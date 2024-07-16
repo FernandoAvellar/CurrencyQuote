@@ -16,6 +16,7 @@ import org.springframework.web.client.RestTemplate;
 import com.avellar.currency_quote.entities.Currency;
 import com.avellar.currency_quote.entities.CurrencyRate;
 import com.avellar.currency_quote.exception.CurrencyNotFoundException;
+import com.avellar.currency_quote.exception.ExternalApiFailureException;
 import com.avellar.currency_quote.repositories.CurrencyRateRepository;
 import com.avellar.currency_quote.repositories.CurrencyRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,38 +42,41 @@ public class CurrencyService {
 	private final String apiUrl = "https://economia.awesomeapi.com.br/json/last/" + VALID_COINS;
 
 	// (roda a cada 30 segundos das 8:30h às 18:59h somente em dias de semana)
-	@Scheduled(cron = "*/30 * 8-18 * * MON-FRI") 
+	@Scheduled(cron = "*/30 * 8-18 * * MON-FRI")
 	public void fetchAndStoreCurrencyRates() {
 		@SuppressWarnings("unchecked")
 		Map<String, Map<String, String>> response = restTemplate.getForObject(apiUrl, Map.class);
+		if (response != null) {
+			for (Map.Entry<String, Map<String, String>> entry : response.entrySet()) {
+				String code = entry.getKey();
+				Map<String, String> data = entry.getValue();
 
-		for (Map.Entry<String, Map<String, String>> entry : response.entrySet()) {
-			String code = entry.getKey();
-			Map<String, String> data = entry.getValue();
+				Currency currency = currencyRepository.findByCode(code);
+				if (currency == null) {
+					currency = new Currency();
+					currency.setCode(code);
+					currency.setName(data.get("name"));
+					currencyRepository.save(currency);
+				}
 
-			Currency currency = currencyRepository.findByCode(code);
-			if (currency == null) {
-				currency = new Currency();
-				currency.setCode(code);
-				currency.setName(data.get("name"));
-				currencyRepository.save(currency);
+				CurrencyRate currencyRate = new CurrencyRate();
+				currencyRate.setCurrency(currency);
+				currencyRate.setHigh(new BigDecimal(data.get("high")));
+				currencyRate.setLow(new BigDecimal(data.get("low")));
+				currencyRate.setVarBid(new BigDecimal(data.get("varBid")));
+				currencyRate.setPctChange(new BigDecimal(data.get("pctChange")));
+				currencyRate.setBid(new BigDecimal(data.get("bid")));
+				currencyRate.setAsk(new BigDecimal(data.get("ask")));
+				currencyRate.setTimestamp(Long.parseLong(data.get("timestamp")));
+				currencyRate.setCreateDate(LocalDateTime.parse(data.get("create_date"), dateTimeFormatter));
+
+				currencyRateRepository.save(currencyRate);
+
+				// Store the last quotation in cache using Redis Server
+				redisTemplate.opsForValue().set(code, currencyRate);
 			}
-
-			CurrencyRate currencyRate = new CurrencyRate();
-			currencyRate.setCurrency(currency);
-			currencyRate.setHigh(new BigDecimal(data.get("high")));
-			currencyRate.setLow(new BigDecimal(data.get("low")));
-			currencyRate.setVarBid(new BigDecimal(data.get("varBid")));
-			currencyRate.setPctChange(new BigDecimal(data.get("pctChange")));
-			currencyRate.setBid(new BigDecimal(data.get("bid")));
-			currencyRate.setAsk(new BigDecimal(data.get("ask")));
-			currencyRate.setTimestamp(Long.parseLong(data.get("timestamp")));
-			currencyRate.setCreateDate(LocalDateTime.parse(data.get("create_date"), dateTimeFormatter));
-
-			currencyRateRepository.save(currencyRate);
-
-			// Store the last quotation in cache using Redis Server
-			redisTemplate.opsForValue().set(code, currencyRate);
+		} else {
+			throw new ExternalApiFailureException("external API failure");
 		}
 	}
 
