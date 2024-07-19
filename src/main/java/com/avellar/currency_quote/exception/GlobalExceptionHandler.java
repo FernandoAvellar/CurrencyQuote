@@ -17,4 +17,9 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<String> handleExternalApiFailureException(ExternalApiFailureException ex) {
 		return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_GATEWAY);
 	}
+
+	@ExceptionHandler(UserAlreadyExistsException.class)
+	public ResponseEntity<Object> handleUserAlreadyExistsException(UserAlreadyExistsException ex) {
+		return new ResponseEntity<>(ex.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
+	}
 }

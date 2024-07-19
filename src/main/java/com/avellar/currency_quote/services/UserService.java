@@ -3,15 +3,14 @@ package com.avellar.currency_quote.services;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.avellar.currency_quote.dto.RegisterUserDto;
 import com.avellar.currency_quote.entities.User;
+import com.avellar.currency_quote.exception.UserAlreadyExistsException;
 import com.avellar.currency_quote.repositories.UserRepository;
 
 import jakarta.transaction.Transactional;
@@ -30,7 +29,7 @@ public class UserService {
 
 		var userFromDb = userRepository.findByUsername(dto.username());
 		if (userFromDb.isPresent()) {
-			throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY);
+			throw new UserAlreadyExistsException("user already exists");
 		}
 
 		var user = new User();
