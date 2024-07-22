@@ -1,5 +1,6 @@
 package com.avellar.currency_quote.services;
 
+import java.net.URI;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.avellar.currency_quote.dto.RegisterUserDto;
 import com.avellar.currency_quote.entities.User;
@@ -37,8 +39,13 @@ public class UserService {
 		user.setPassword(passwordEncoder.encode(dto.password()));
 
 		userRepository.save(user);
+		
+		URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(user.getId())
+                .toUri();
 
-		return ResponseEntity.ok().build();
+        return ResponseEntity.created(uri).build();
 	}
 
 	public ResponseEntity<List<User>> listUsers() {
