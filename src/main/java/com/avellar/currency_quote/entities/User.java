@@ -1,19 +1,16 @@
 package com.avellar.currency_quote.entities;
 
+import jakarta.persistence.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.avellar.currency_quote.dto.LoginRequestDto;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.List;
 
 @Entity
 @Table(name = "tb_users")
@@ -31,6 +28,14 @@ public class User {
 	@Column(unique = true)
 	private String username;
 	private String password;
+
+	@ManyToMany
+	@JoinTable(
+			name = "user_favorite_currencies",
+			joinColumns = @JoinColumn(name = "user_id"),
+			inverseJoinColumns = @JoinColumn(name = "currency_id")
+	)
+	private List<Currency> favoriteCurrencies;
 
 	public boolean isLoginCorrect(LoginRequestDto loginRequest, PasswordEncoder passwordEncoder) {
 		return passwordEncoder.matches(loginRequest.password(), this.password);

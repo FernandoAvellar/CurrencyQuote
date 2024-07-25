@@ -2,13 +2,10 @@ package com.avellar.currency_quote.controllers;
 
 import java.util.List;
 
+import com.avellar.currency_quote.entities.Currency;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.avellar.currency_quote.dto.RegisterUserDto;
 import com.avellar.currency_quote.entities.User;
@@ -46,5 +43,27 @@ public class UserController {
 			@ApiResponse(responseCode = "401", description = "Invalid token") })
 	public ResponseEntity<List<User>> listUsers() {
 		return userService.listUsers();
+	}
+
+	@GetMapping("/favorites")
+	@Operation(summary = "Get favorite currencies.", description = "Endpoint to get favorite currencies of the authenticated user.", security = @SecurityRequirement(name = "bearerAuth"))
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Favorite currencies retrieved with success", content = @Content(schema = @Schema(implementation = Currency.class))),
+			@ApiResponse(responseCode = "401", description = "Invalid token"),
+			@ApiResponse(responseCode = "404", description = "User not found") })
+	public ResponseEntity<List<Currency>> getFavoriteCurrencies(@RequestHeader("Authorization") String token) {
+		List<Currency> favorites = userService.getFavoriteCurrencies(token);
+		return ResponseEntity.ok(favorites);
+	}
+
+	@PostMapping("/favorites")
+	@Operation(summary = "Update favorite currencies.", description = "Endpoint to update favorite currencies of the authenticated user.", security = @SecurityRequirement(name = "bearerAuth"))
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "204", description = "Favorite currencies updated successfully"),
+			@ApiResponse(responseCode = "401", description = "Invalid token"),
+			@ApiResponse(responseCode = "404", description = "User not found") })
+	public ResponseEntity<Void> updateFavoriteCurrencies(@RequestHeader("Authorization") String token, @RequestBody List<String> favoriteCurrencyCodes) {
+		userService.updateFavoriteCurrencies(token, favoriteCurrencyCodes);
+		return ResponseEntity.noContent().build();
 	}
 }

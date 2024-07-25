@@ -1,5 +1,6 @@
 package com.avellar.currency_quote.entities;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -24,6 +25,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CurrencyRate implements Serializable {
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Id

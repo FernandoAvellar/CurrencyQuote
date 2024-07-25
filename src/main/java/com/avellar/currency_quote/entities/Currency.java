@@ -1,18 +1,12 @@
 package com.avellar.currency_quote.entities;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,6 +19,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Currency implements Serializable {
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	@Id
@@ -40,4 +35,7 @@ public class Currency implements Serializable {
 	@JsonIgnore
 	private List<CurrencyRate> rates;
 
+	@ManyToMany(mappedBy = "favoriteCurrencies")
+	@JsonIgnore
+	private List<User> users;
 }
