@@ -5,9 +5,14 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -40,13 +45,19 @@ public class CurrencyService {
 
 	private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 	private final RestTemplate restTemplate = new RestTemplate();
-	private final String VALID_COINS = "USD-BRL,EUR-BRL,JPY-BRL,BTC-BRL,CAD-BRL,GBP-BRL,ARS-BRL,CHF-BRL,AUD-BRL,CNY-BRL,ETH-BRL,SGD-BRL,AED-BRL,SEK-BRL,CLP-BRL,PYG-BRL,MXN-BRL,UYU-BRL,COP-BRL,BOB-BRL";
-	private final String apiUrl = "https://economia.awesomeapi.com.br/json/last/" + VALID_COINS;
+	private final String availableCurrencyApiUrl = "https://economia.awesomeapi.com.br/json/available";
+	private String VALID_COINS;
+
+    @PostConstruct
+	public void init() {
+		populateValidCoins();
+	}
 
 	// (roda a cada 30 segundos das 8:30h às 18:59h somente em dias de semana)
 	@Scheduled(cron = "*/30 * 8-18 * * MON-FRI")
 	@Transactional
 	public void fetchAndStoreCurrencyRates() {
+		String apiUrl = "https://economia.awesomeapi.com.br/json/last/" + VALID_COINS;
 		@SuppressWarnings("unchecked")
 		Map<String, Map<String, String>> response = restTemplate.getForObject(apiUrl, Map.class);
 		if (response != null) {
@@ -103,6 +114,26 @@ public class CurrencyService {
 			return restTemplate.getForObject(url, Object.class);
 		} catch (HttpClientErrorException e) {
 			throw new CurrencyNotFoundException("Currency code [" + currency + "] not found.");
+		}
+	}
+
+	private void populateValidCoins() {
+		try {
+			ResponseEntity<Map<String, String>> responseEntity = restTemplate.exchange(
+					availableCurrencyApiUrl,
+					HttpMethod.GET,
+					null,
+					new ParameterizedTypeReference<Map<String, String>>() {}
+			);
+			Map<String, String> response = responseEntity.getBody();
+
+			if (response != null) {
+				VALID_COINS = response.keySet().stream()
+						.filter(s -> s.endsWith("BRL"))
+						.collect(Collectors.joining(","));
+			}
+		} catch (Exception e) {
+			throw new ExternalApiFailureException("Failed to fetch valid coins from external API");
 		}
 	}
 }
