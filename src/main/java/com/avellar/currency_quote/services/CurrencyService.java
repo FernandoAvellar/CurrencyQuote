@@ -48,12 +48,13 @@ public class CurrencyService {
 	private final String availableCurrencyApiUrl = "https://economia.awesomeapi.com.br/json/available";
 	private String VALID_COINS;
 
-    @PostConstruct
+	@PostConstruct
 	public void init() {
 		populateValidCoins();
 	}
 
-	// (roda a cada 30 segundos das 8:30h às 18:59h somente em dias de semana)
+	// Get currency cotation in each 30 seconds only during bussiness days and
+	// bussiness hours. (Mon to Fri - 08:30am until 18:59pm)
 	@Scheduled(cron = "*/30 * 8-18 * * MON-FRI")
 	@Transactional
 	public void fetchAndStoreCurrencyRates() {
@@ -123,8 +124,8 @@ public class CurrencyService {
 					availableCurrencyApiUrl,
 					HttpMethod.GET,
 					null,
-					new ParameterizedTypeReference<Map<String, String>>() {}
-			);
+					new ParameterizedTypeReference<Map<String, String>>() {
+					});
 			Map<String, String> response = responseEntity.getBody();
 
 			if (response != null) {

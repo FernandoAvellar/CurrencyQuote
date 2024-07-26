@@ -2,7 +2,6 @@ package com.avellar.currency_quote.services;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.avellar.currency_quote.entities.Currency;
@@ -50,13 +49,13 @@ public class UserService {
 		user.setPassword(passwordEncoder.encode(dto.password()));
 
 		userRepository.save(user);
-		
-		URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(user.getId())
-                .toUri();
 
-        return ResponseEntity.created(uri).build();
+		URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
+				.path("/{id}")
+				.buildAndExpand(user.getId())
+				.toUri();
+
+		return ResponseEntity.created(uri).build();
 	}
 
 	public ResponseEntity<List<User>> listUsers() {

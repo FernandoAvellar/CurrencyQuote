@@ -16,9 +16,9 @@ public class SwaggerConfig {
 	@Bean
 	OpenAPI customOpenAPI() {
 		return new OpenAPI()
-				.info(new Info().title("API de Cotações de Moedas").version("1.0")
-						.description("API para retornar cotações de moedas em tempo real")
-						.contact(new Contact().name("Fernando Avellar").email("fernandoavellar@exemplo.com")))
+				.info(new Info().title("Currency conversion API").version("1.0")
+						.description("API used to get real time currency quote conversion")
+						.contact(new Contact().name("Fernando Avellar").email("fernandoavellar@avellar.com")))
 				.addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
 				.components(new Components().addSecuritySchemes("bearerAuth",
 						new SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT")));
