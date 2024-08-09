@@ -2,12 +2,17 @@ package com.avellar.currency_quote.controllers;
 
 import java.util.List;
 
-import com.avellar.currency_quote.entities.Currency;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import com.avellar.currency_quote.dto.RegisterUserDto;
+import com.avellar.currency_quote.dto.CreateUserDto;
+import com.avellar.currency_quote.entities.Currency;
 import com.avellar.currency_quote.entities.User;
 import com.avellar.currency_quote.services.UserService;
 
@@ -29,11 +34,10 @@ public class UserController {
 
 	@PostMapping("/register")
 	@Operation(summary = "Create a new user.", description = "Endpoint to create a new user.", security = {})
-	@ApiResponses(value = { 
-			@ApiResponse(responseCode = "201", description = "User created successfully"),
+	@ApiResponses(value = { @ApiResponse(responseCode = "201", description = "User created successfully"),
 			@ApiResponse(responseCode = "422", description = "User already exists.") })
-	public ResponseEntity<?> newUser(@RequestBody RegisterUserDto registerUserDto) {
-		return userService.newUser(registerUserDto);
+	public ResponseEntity<?> createUser(@RequestBody CreateUserDto createUserDto) {
+		return userService.createUser(createUserDto);
 	}
 
 	@GetMapping()
@@ -62,7 +66,8 @@ public class UserController {
 			@ApiResponse(responseCode = "204", description = "Favorite currencies updated successfully"),
 			@ApiResponse(responseCode = "401", description = "Invalid token"),
 			@ApiResponse(responseCode = "404", description = "User not found") })
-	public ResponseEntity<Void> updateFavoriteCurrencies(@RequestHeader("Authorization") String token, @RequestBody List<String> favoriteCurrencyCodes) {
+	public ResponseEntity<Void> updateFavoriteCurrencies(@RequestHeader("Authorization") String token,
+			@RequestBody List<String> favoriteCurrencyCodes) {
 		userService.updateFavoriteCurrencies(token, favoriteCurrencyCodes);
 		return ResponseEntity.noContent().build();
 	}

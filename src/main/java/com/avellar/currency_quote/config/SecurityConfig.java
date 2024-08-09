@@ -36,23 +36,22 @@ public class SecurityConfig {
 	private RSAPrivateKey privateKey;
 
 	@Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        http.authorizeHttpRequests(authorize -> authorize
-                .requestMatchers(HttpMethod.POST, "/users/register").permitAll()
-                .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-                .requestMatchers(
-                    new AntPathRequestMatcher("/v3/api-docs/**"),
-                    new AntPathRequestMatcher("/swagger-ui/**"),
-                    new AntPathRequestMatcher("/swagger-ui.html")
-                ).permitAll()
-                .anyRequest().authenticated())
-            .csrf(csrf -> csrf.disable())
-            .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+		http.authorizeHttpRequests(authorize -> authorize
+			.requestMatchers(HttpMethod.POST, "/users/register").permitAll()
+			.requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+			.requestMatchers(
+							 new AntPathRequestMatcher("/v3/api-docs/**"),
+							 new AntPathRequestMatcher("/swagger-ui/**"), 
+							 new AntPathRequestMatcher("/swagger-ui.html")).permitAll()
+			.anyRequest().authenticated())
+		.csrf(csrf -> csrf.disable())
+		.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
+		.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-        return http.build();
-    }
+		return http.build();
+	}
 
 	@Bean
 	JwtDecoder jwtDecoder() {

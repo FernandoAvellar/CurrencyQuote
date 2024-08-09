@@ -3,6 +3,7 @@ package com.avellar.currency_quote.services;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import com.avellar.currency_quote.dto.LoginRequestDto;
 import com.avellar.currency_quote.dto.LoginResponseDto;
+import com.avellar.currency_quote.entities.Role;
 import com.avellar.currency_quote.repositories.UserRepository;
 
 @Service
@@ -46,9 +48,13 @@ public class TokenService {
 
 		var now = Instant.now();
 		var expiresIn = 1200L; // expires after 20 minutes
+		
+        var roles = user.get().getRoles().stream()
+                .map(Role::getName)
+                .collect(Collectors.toList());
 
 		var claims = JwtClaimsSet.builder().issuer("currency_quote_backend").subject(user.get().getId().toString())
-				.issuedAt(now).expiresAt(now.plusSeconds(expiresIn)).build();
+				.issuedAt(now).expiresAt(now.plusSeconds(expiresIn)).claim("roles", roles).build();
 
 		var jwtValue = jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
 
@@ -67,6 +73,7 @@ public class TokenService {
 
 			Map<String, Object> userInfo = new HashMap<>();
 			userInfo.put("username", user.get().getUsername());
+			userInfo.put("userRole", user.get().getRoles());
 
 			return ResponseEntity.ok(userInfo);
 

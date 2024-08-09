@@ -53,8 +53,8 @@ public class CurrencyService {
 		populateValidCoins();
 	}
 
-	// Get currency cotation in each 30 seconds only during bussiness days and
-	// bussiness hours. (Mon to Fri - 08:30am until 18:59pm)
+	// Get currency quotation in each 30 seconds only during business days and
+	// business hours. (Mon to Fri - 08:30am until 18:59pm)
 	@Scheduled(cron = "*/30 * 8-18 * * MON-FRI")
 	@Transactional
 	public void fetchAndStoreCurrencyRates() {

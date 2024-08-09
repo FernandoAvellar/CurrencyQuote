@@ -1,6 +1,6 @@
 package com.avellar.currency_quote.controllers;
 
-import com.avellar.currency_quote.dto.RegisterUserDto;
+import com.avellar.currency_quote.dto.CreateUserDto;
 import com.avellar.currency_quote.exception.UserAlreadyExistsException;
 import com.avellar.currency_quote.services.UserService;
 import com.avellar.currency_quote.config.SecurityConfig;
@@ -35,7 +35,7 @@ public class UserControllerTest {
 
         @Test
         public void testCreateNewUser_Success() throws Exception {
-                Mockito.when(userService.newUser(any(RegisterUserDto.class)))
+                Mockito.when(userService.createUser(any(CreateUserDto.class)))
                                 .thenReturn(ResponseEntity.status(HttpStatus.CREATED).build());
 
                 mockMvc.perform(post("/users/register")
@@ -46,7 +46,7 @@ public class UserControllerTest {
 
         @Test
         public void testCreateNewUserThatAlreadyExists_Failure() throws Exception {
-                Mockito.when(userService.newUser(any(RegisterUserDto.class)))
+                Mockito.when(userService.createUser(any(CreateUserDto.class)))
                                 .thenThrow(new UserAlreadyExistsException("user already exists"));
 
                 mockMvc.perform(post("/users/register")
