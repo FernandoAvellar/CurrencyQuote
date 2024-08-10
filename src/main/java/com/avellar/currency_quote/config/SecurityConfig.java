@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -17,6 +16,8 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
@@ -37,20 +38,31 @@ public class SecurityConfig {
 
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+	    http.authorizeHttpRequests(authorize -> authorize
+	            .requestMatchers(HttpMethod.POST, "/users/register").permitAll()
+	            .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+	            .requestMatchers(
+	                    new AntPathRequestMatcher("/v3/api-docs/**"),
+	                    new AntPathRequestMatcher("/swagger-ui/**"), 
+	                    new AntPathRequestMatcher("/swagger-ui.html")).permitAll()
+	            .anyRequest().authenticated())
+	        .csrf(csrf -> csrf.disable())
+	        .oauth2ResourceServer(oauth2 -> oauth2
+	            .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())))
+	        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-		http.authorizeHttpRequests(authorize -> authorize
-			.requestMatchers(HttpMethod.POST, "/users/register").permitAll()
-			.requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
-			.requestMatchers(
-							 new AntPathRequestMatcher("/v3/api-docs/**"),
-							 new AntPathRequestMatcher("/swagger-ui/**"), 
-							 new AntPathRequestMatcher("/swagger-ui.html")).permitAll()
-			.anyRequest().authenticated())
-		.csrf(csrf -> csrf.disable())
-		.oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
-		.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+	    return http.build();
+	}
+	
+	@Bean
+	JwtAuthenticationConverter jwtAuthenticationConverter() {
+	    JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
+	    grantedAuthoritiesConverter.setAuthorityPrefix(""); //My class Role still insert ROLE prefix before
+		grantedAuthoritiesConverter.setAuthoritiesClaimName("roles");  // Claim name in your JWT
 
-		return http.build();
+	    JwtAuthenticationConverter authenticationConverter = new JwtAuthenticationConverter();
+	    authenticationConverter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
+	    return authenticationConverter;
 	}
 
 	@Bean
