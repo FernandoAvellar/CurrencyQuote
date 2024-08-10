@@ -5,14 +5,18 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.avellar.currency_quote.dto.CreateUserDto;
+import com.avellar.currency_quote.dto.UpdatePasswordDto;
 import com.avellar.currency_quote.entities.Currency;
 import com.avellar.currency_quote.entities.User;
 import com.avellar.currency_quote.services.UserService;
@@ -50,6 +54,30 @@ public class UserController {
 	public ResponseEntity<List<User>> listUsers() {
 		return userService.listUsers();
 	}
+	
+	@DeleteMapping("/{username}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @Operation(summary = "Delete a user.", description = "Endpoint to delete a user by username.", security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "User deleted successfully"),
+            @ApiResponse(responseCode = "401", description = "Invalid token"),
+            @ApiResponse(responseCode = "404", description = "User not found")})
+    public ResponseEntity<Void> deleteUser(@PathVariable String username) {
+        userService.deleteUser(username);
+        return ResponseEntity.noContent().build();
+    }
+
+	@PutMapping("/{username}/password/change")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @Operation(summary = "Update user's password.", description = "Endpoint to update a user's password by username.", security = @SecurityRequirement(name = "bearerAuth"))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Password updated successfully"),
+            @ApiResponse(responseCode = "401", description = "Invalid token"),
+            @ApiResponse(responseCode = "404", description = "User not found")})
+    public ResponseEntity<Void> updatePassword(@PathVariable String username, @RequestBody UpdatePasswordDto passwordDto) {
+        userService.updatePassword(username, passwordDto);
+        return ResponseEntity.ok().build();
+    }
 
 	@GetMapping("/favorites")
 	@Operation(summary = "Get favorite currencies.", description = "Endpoint to get favorite currencies of the authenticated user.", security = @SecurityRequirement(name = "bearerAuth"))

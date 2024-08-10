@@ -6,14 +6,17 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.avellar.currency_quote.dto.CreateUserDto;
+import com.avellar.currency_quote.dto.UpdatePasswordDto;
 import com.avellar.currency_quote.entities.Currency;
 import com.avellar.currency_quote.entities.Role;
 import com.avellar.currency_quote.entities.User;
@@ -55,11 +58,9 @@ public class UserService {
 		user.setUsername(dto.username());
 		user.setPassword(passwordEncoder.encode(dto.password()));
 		user.setRoles(Set.of(basicRole));
-
 		userRepository.save(user);
 
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(user.getId()).toUri();
-
 		return ResponseEntity.created(uri).build();
 	}
 
@@ -67,6 +68,22 @@ public class UserService {
 		var users = userRepository.findAll();
 		return ResponseEntity.ok(users);
 	}
+	
+	@Transactional
+    public void deleteUser(String username) {
+        User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        userRepository.delete(user);
+    }
+	
+	@Transactional
+    public void updatePassword(String username, UpdatePasswordDto passwordDto) {
+        User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        user.setPassword(passwordEncoder.encode(passwordDto.newPassword()));
+        userRepository.save(user);
+    }
 
 	public List<Currency> getFavoriteCurrencies(String token) {
 		User user = (User) getUserFromToken(token);

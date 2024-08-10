@@ -1,5 +1,7 @@
 package com.avellar.currency_quote.entities;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -7,7 +9,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.avellar.currency_quote.dto.LoginRequestDto;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -41,13 +42,13 @@ public class User {
 	@Column(nullable = false)
 	private String password;
 
-	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "tb_users_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
-	private Set<Role> roles;
+	private Set<Role> roles = new HashSet<>();
 
 	@ManyToMany
 	@JoinTable(name = "user_favorite_currencies", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "currency_id"))
-	private List<Currency> favoriteCurrencies;
+	private List<Currency> favoriteCurrencies = new ArrayList<>();
 
 	public boolean isLoginCorrect(LoginRequestDto loginRequest, PasswordEncoder passwordEncoder) {
 		return passwordEncoder.matches(loginRequest.password(), this.password);
