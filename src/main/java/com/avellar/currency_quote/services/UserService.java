@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.avellar.currency_quote.dto.ChangePasswordDto;
 import com.avellar.currency_quote.dto.CreateUserDto;
 import com.avellar.currency_quote.dto.UpdatePasswordDto;
 import com.avellar.currency_quote.entities.Currency;
@@ -77,11 +78,24 @@ public class UserService {
     }
 	
 	@Transactional
-    public void updatePassword(String username, UpdatePasswordDto passwordDto) {
+    public void changePasswordByAdminUser(String username, UpdatePasswordDto passwordDto) {
         User user = userRepository.findByUsername(username)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         user.setPassword(passwordEncoder.encode(passwordDto.newPassword()));
+        userRepository.save(user);
+    }
+	
+	@Transactional
+	public void changePassword(ChangePasswordDto changePasswordDto) {
+        User user = userRepository.findByUsername(changePasswordDto.username())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        if (!passwordEncoder.matches(changePasswordDto.actualPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("Incorrect actual password");
+        }
+
+        user.setPassword(passwordEncoder.encode(changePasswordDto.newPassword()));
         userRepository.save(user);
     }
 

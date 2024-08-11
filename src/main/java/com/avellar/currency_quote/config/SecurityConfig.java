@@ -40,6 +40,7 @@ public class SecurityConfig {
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 	    http.authorizeHttpRequests(authorize -> authorize
 	            .requestMatchers(HttpMethod.POST, "/users/register").permitAll()
+	            .requestMatchers(HttpMethod.PUT, "/users/changepassword").permitAll()
 	            .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
 	            .requestMatchers(
 	                    new AntPathRequestMatcher("/v3/api-docs/**"),
