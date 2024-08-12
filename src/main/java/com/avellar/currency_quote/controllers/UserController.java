@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.avellar.currency_quote.dto.ChangePasswordDto;
 import com.avellar.currency_quote.dto.CreateUserDto;
+import com.avellar.currency_quote.dto.UpdateRolesDto;
 import com.avellar.currency_quote.dto.UpdatePasswordDto;
 import com.avellar.currency_quote.entities.Currency;
 import com.avellar.currency_quote.entities.User;
@@ -67,13 +68,26 @@ public class UserController {
         userService.deleteUser(username);
         return ResponseEntity.noContent().build();
     }
+	
+	@PutMapping("/updateuserroles")
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
+	@Operation(summary = "Manage user's roles", description = "Endpoint to allow an Admin user to manage the roles of a user.", security = @SecurityRequirement(name = "bearerAuth"))
+	@ApiResponses(value = {
+	    @ApiResponse(responseCode = "200", description = "Roles updated successfully"),
+	    @ApiResponse(responseCode = "400", description = "Invalid request"),
+	    @ApiResponse(responseCode = "403", description = "Operation not authorized, only allowed to Admin User"),
+	    @ApiResponse(responseCode = "404", description = "User not found")})
+	public ResponseEntity<Void> updateUserRoles(@RequestBody UpdateRolesDto updateRolesDto) {
+	    userService.updateUserRoles(updateRolesDto);
+	    return ResponseEntity.ok().build();
+	}
 
 	@PutMapping("/{username}/password/change")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @Operation(summary = "Update user's password by Admin.", description = "Endpoint to allow Admin user to update any user's password.", security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Password updated successfully"),
-            @ApiResponse(responseCode = "401", description = "Invalid token"),
+            @ApiResponse(responseCode = "403", description = "Operation not authorized, only allowed to Admin User"),
             @ApiResponse(responseCode = "404", description = "User not found")})
     public ResponseEntity<Void> changePasswordByAdminUser(@PathVariable String username, @RequestBody UpdatePasswordDto passwordDto) {
         userService.changePasswordByAdminUser(username, passwordDto);

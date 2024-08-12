@@ -1,6 +1,7 @@
 package com.avellar.currency_quote.services;
 
 import java.net.URI;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -17,6 +18,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.avellar.currency_quote.dto.ChangePasswordDto;
 import com.avellar.currency_quote.dto.CreateUserDto;
+import com.avellar.currency_quote.dto.UpdateRolesDto;
 import com.avellar.currency_quote.dto.UpdatePasswordDto;
 import com.avellar.currency_quote.entities.Currency;
 import com.avellar.currency_quote.entities.Role;
@@ -69,35 +71,60 @@ public class UserService {
 		var users = userRepository.findAll();
 		return ResponseEntity.ok(users);
 	}
-	
-	@Transactional
-    public void deleteUser(String username) {
-        User user = userRepository.findByUsername(username)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-        userRepository.delete(user);
-    }
-	
-	@Transactional
-    public void changePasswordByAdminUser(String username, UpdatePasswordDto passwordDto) {
-        User user = userRepository.findByUsername(username)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        user.setPassword(passwordEncoder.encode(passwordDto.newPassword()));
-        userRepository.save(user);
-    }
-	
+	@Transactional
+	public void deleteUser(String username) {
+		User user = userRepository.findByUsername(username)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+		userRepository.delete(user);
+	}
+
+	@Transactional
+	public void changePasswordByAdminUser(String username, UpdatePasswordDto passwordDto) {
+		User user = userRepository.findByUsername(username)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+		user.setPassword(passwordEncoder.encode(passwordDto.newPassword()));
+		userRepository.save(user);
+	}
+
+	@Transactional
+	public void updateUserRoles(UpdateRolesDto updateRolesDto) {
+		String username = updateRolesDto.username();
+		List<String> roles = updateRolesDto.roles();
+
+		User user = userRepository.findByUsername(username)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+		if (roles.isEmpty()) {
+			throw new IllegalArgumentException("Role Array must have at least one role.");
+		}
+
+		Set<Role> validRoles = new HashSet<>();
+		for (String roleName : roles) {
+			Role role = roleRepository.findByName(roleName);
+			if (role == null) {
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Role not found: " + roleName);
+			}
+			validRoles.add(role);
+		}
+
+		user.setRoles(validRoles);
+		userRepository.save(user);
+	}
+
 	@Transactional
 	public void changePassword(ChangePasswordDto changePasswordDto) {
-        User user = userRepository.findByUsername(changePasswordDto.username())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+		User user = userRepository.findByUsername(changePasswordDto.username())
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
-        if (!passwordEncoder.matches(changePasswordDto.actualPassword(), user.getPassword())) {
-            throw new IllegalArgumentException("Incorrect actual password");
-        }
+		if (!passwordEncoder.matches(changePasswordDto.actualPassword(), user.getPassword())) {
+			throw new IllegalArgumentException("Incorrect actual password");
+		}
 
-        user.setPassword(passwordEncoder.encode(changePasswordDto.newPassword()));
-        userRepository.save(user);
-    }
+		user.setPassword(passwordEncoder.encode(changePasswordDto.newPassword()));
+		userRepository.save(user);
+	}
 
 	public List<Currency> getFavoriteCurrencies(String token) {
 		User user = (User) getUserFromToken(token);

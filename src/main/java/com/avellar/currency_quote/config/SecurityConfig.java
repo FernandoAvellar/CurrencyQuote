@@ -58,7 +58,7 @@ public class SecurityConfig {
 	@Bean
 	JwtAuthenticationConverter jwtAuthenticationConverter() {
 	    JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
-	    grantedAuthoritiesConverter.setAuthorityPrefix(""); //My class Role still insert ROLE prefix before
+	    grantedAuthoritiesConverter.setAuthorityPrefix(""); //My class Role is already insert ROLE prefix before
 		grantedAuthoritiesConverter.setAuthoritiesClaimName("roles");  // Claim name in your JWT
 
 	    JwtAuthenticationConverter authenticationConverter = new JwtAuthenticationConverter();
