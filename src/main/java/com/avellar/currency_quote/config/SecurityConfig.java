@@ -39,9 +39,8 @@ public class SecurityConfig {
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 	    http.authorizeHttpRequests(authorize -> authorize
-	            .requestMatchers(HttpMethod.POST, "/users/register").permitAll()
+	            .requestMatchers(HttpMethod.POST, "/users/register", "/auth/login", "/auth/refresh").permitAll()
 	            .requestMatchers(HttpMethod.PUT, "/users/changepassword").permitAll()
-	            .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
 	            .requestMatchers(
 	                    new AntPathRequestMatcher("/v3/api-docs/**"),
 	                    new AntPathRequestMatcher("/swagger-ui/**"), 

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.avellar.currency_quote.dto.AuthMeResponseDto;
 import com.avellar.currency_quote.dto.LoginRequestDto;
 import com.avellar.currency_quote.dto.LoginResponseDto;
+import com.avellar.currency_quote.dto.RefreshTokenRequestDto;
 import com.avellar.currency_quote.services.TokenService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -38,6 +39,15 @@ public class TokenController {
 			@ApiResponse(responseCode = "401", description = "Invalid user or password") })
 	public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto loginRequestDto) {
 		return tokenService.login(loginRequestDto);
+	}
+	
+	@PostMapping("/refresh")
+	@Operation(summary = "Refresh JWT token.", description = "Endpoint used to refresh an access token using a refresh token.", security = {})
+	@ApiResponses(value = {
+	        @ApiResponse(responseCode = "200", description = "Token refreshed successfully", content = @Content(schema = @Schema(implementation = LoginResponseDto.class))),
+	        @ApiResponse(responseCode = "401", description = "Invalid refresh token") })
+	public ResponseEntity<LoginResponseDto> refresh(@RequestBody RefreshTokenRequestDto refreshTokenRequestDto) {
+	    return tokenService.refresh(refreshTokenRequestDto);
 	}
 
 	@GetMapping("/me")

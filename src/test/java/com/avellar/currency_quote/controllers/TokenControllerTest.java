@@ -87,7 +87,7 @@ public class TokenControllerTest {
         Mockito.when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user));
         Mockito.when(userRepository.findById(any(Long.class))).thenReturn(Optional.of(user));
 
-        loginResponseDto = new LoginResponseDto(jwt.getTokenValue(), 1200L);
+        loginResponseDto = new LoginResponseDto(jwt.getTokenValue(), 1200L, null);
     }
 
     @Test
