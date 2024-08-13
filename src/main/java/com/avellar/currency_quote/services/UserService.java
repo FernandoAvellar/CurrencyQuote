@@ -23,6 +23,7 @@ import com.avellar.currency_quote.dto.UpdatePasswordDto;
 import com.avellar.currency_quote.entities.Currency;
 import com.avellar.currency_quote.entities.Role;
 import com.avellar.currency_quote.entities.User;
+import com.avellar.currency_quote.exception.IncorrectPasswordException;
 import com.avellar.currency_quote.exception.UserAlreadyExistsException;
 import com.avellar.currency_quote.repositories.CurrencyRepository;
 import com.avellar.currency_quote.repositories.RoleRepository;
@@ -119,7 +120,7 @@ public class UserService {
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
 		if (!passwordEncoder.matches(changePasswordDto.actualPassword(), user.getPassword())) {
-			throw new IllegalArgumentException("Incorrect actual password");
+			throw new IncorrectPasswordException("Incorrect actual password: " + changePasswordDto.actualPassword());
 		}
 
 		user.setPassword(passwordEncoder.encode(changePasswordDto.newPassword()));

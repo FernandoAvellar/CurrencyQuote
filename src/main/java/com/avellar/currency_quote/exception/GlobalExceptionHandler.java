@@ -28,16 +28,21 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<Object> handleUserAlreadyExistsException(UserAlreadyExistsException ex) {
 		return new ResponseEntity<>(ex.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY);
 	}
-	
-	@ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<Object> handleResponseStatusException(ResponseStatusException ex, WebRequest request) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", ex.getStatusCode().value());
-        body.put("error", ex.getReason());
-        body.put("message", ex.getMessage());
-        body.put("path", request.getDescription(false).substring(4));
 
-        return new ResponseEntity<>(body, ex.getStatusCode());
-    }
+	@ExceptionHandler(IncorrectPasswordException.class)
+	public ResponseEntity<String> handleIncorrectPasswordException(IncorrectPasswordException ex) {
+		return new ResponseEntity<>(ex.getMessage(), HttpStatus.UNAUTHORIZED);
+	}
+
+	@ExceptionHandler(ResponseStatusException.class)
+	public ResponseEntity<Object> handleResponseStatusException(ResponseStatusException ex, WebRequest request) {
+		Map<String, Object> body = new HashMap<>();
+		body.put("timestamp", LocalDateTime.now());
+		body.put("status", ex.getStatusCode().value());
+		body.put("error", ex.getReason());
+		body.put("message", ex.getMessage());
+		body.put("path", request.getDescription(false).substring(4));
+
+		return new ResponseEntity<>(body, ex.getStatusCode());
+	}
 }
