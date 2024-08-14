@@ -8,7 +8,6 @@ import java.util.Set;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.avellar.currency_quote.dto.LoginRequestDto;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -52,19 +51,18 @@ public class User {
 	@ManyToMany
 	@JoinTable(name = "user_favorite_currencies", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "currency_id"))
 	private List<Currency> favoriteCurrencies = new ArrayList<>();
-	
+
 	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-	@JsonIgnore
-    private RefreshToken refreshToken;
+	private RefreshToken refreshToken;
 
 	public boolean isLoginCorrect(LoginRequestDto loginRequest, PasswordEncoder passwordEncoder) {
 		return passwordEncoder.matches(loginRequest.password(), this.password);
 	}
-	
+
 	public void setRefreshToken(RefreshToken refreshToken) {
-        if (refreshToken != null) {
-            refreshToken.setUser(this);
-        }
-        this.refreshToken = refreshToken;
-    }
+		if (refreshToken != null) {
+			refreshToken.setUser(this);
+		}
+		this.refreshToken = refreshToken;
+	}
 }
